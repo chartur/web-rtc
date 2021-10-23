@@ -19,7 +19,7 @@ const iceServers = {
 };
 
 const streamData = {
-  // audio: true,
+  audio: true,
   video: true
 };
 
