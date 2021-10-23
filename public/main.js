@@ -3,7 +3,7 @@ const enterButton = document.querySelector('#enter-room');
 const myVideo = document.querySelector('#my-video');
 const remoteVideo = document.querySelector('#remote-video');
 const conversation = document.querySelector('#conversation');
-
+myVideo.muted = true;
 let localStream,
   remoteStream,
   isCaller,
