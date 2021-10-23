@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body>
+  <div>
+    <label>Enter room number</label>
+    <input name="room-name" id="room-number" type="text">
+    <button id="enter-room">Enter</button>
+  </div>
+
+  <div id="conversation" style="display: none">
+    <video id="my-video" autoplay></video>
+    <video id="remote-video" autoplay></video>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
