@@ -1,8 +1,5 @@
-const http = require('http');
-const server = new http.Server();
-const io = require('socket.io')(server, { origins: 'http://localhots:5000'});
+const io = require('socket.io')();
 const port = process.env.PORT || 3000;
-
 const events = {
   INIT: 'init',
   CREATED: 'create',
@@ -12,15 +9,6 @@ const events = {
   ICE_CANDIDATES: 'ice-candidates',
   JOINED_NEW: 'joined-new-user'
 };
-
-server.on('request', function (req, res) {
-    res.writeHead(200);
-    res.end('Hello world!');
-});
-
-server.listen(port,() => {
-  console.log('Server is listening on port ' + port)
-});
 
 io.on('connection', socket => {
   socket.on(events.INIT, (room) => {
@@ -48,4 +36,8 @@ io.on('connection', socket => {
     console.log(iceCandidate);
     socket.to(socket.roomId).emit(events.ICE_CANDIDATES, iceCandidate);
   });
+});
+
+io.listen(port,() => {
+  console.log('Server is listening on port ' + port)
 });
