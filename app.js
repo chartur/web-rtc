@@ -17,6 +17,11 @@ const events = {
   JOINED_NEW: 'joined-new-user'
 };
 
+http.on('request', function (req, res) {
+    res.writeHead(200);
+    res.end('Hello world!');
+});
+
 server.listen(port,() => {
   console.log('Server is listening on port ' + port)
 });
