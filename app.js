@@ -1,12 +1,6 @@
 const http = require('http');
 const server = new http.Server();
-const io = require('socket.io')(server, {
-  cors: {
-    origin: "*"
-  },
-  allowEIO3: true
-});
-io.set('origins', '*:*');
+const io = require('socket.io')(server, { origins: '*:*'});
 const port = process.env.PORT || 3000;
 
 const events = {
