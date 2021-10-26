@@ -1,6 +1,6 @@
 const http = require('http');
 const server = new http.Server();
-const io = require('socket.io')(server, { origins: '*'});
+const io = require('socket.io')(server, { origins: 'http://localhots:5000'});
 const port = process.env.PORT || 3000;
 
 const events = {
