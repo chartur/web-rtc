@@ -17,7 +17,7 @@ const events = {
   JOINED_NEW: 'joined-new-user'
 };
 
-http.on('request', function (req, res) {
+server.on('request', function (req, res) {
     res.writeHead(200);
     res.end('Hello world!');
 });
