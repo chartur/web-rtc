@@ -6,7 +6,7 @@ const io = require('socket.io')(server, {
   },
   allowEIO3: true
 });
-io.origins('*:*')
+io.set('origins', '*:*');
 const port = process.env.PORT || 3000;
 
 const events = {
