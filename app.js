@@ -7,7 +7,8 @@ const io = require('socket.io')(server, {
     res.writeHead(200, {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': '*'
-    })
+    });
+    res.end();
   }
 });
 const port = process.env.PORT || 3000;
