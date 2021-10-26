@@ -1,4 +1,9 @@
-const io = require('socket.io')();
+const server = require('http').createServer();
+const socketio = require('socket.io')(server, {
+  cors: {
+    origins: ['*']
+  }
+});
 const port = process.env.PORT || 3000;
 const events = {
   INIT: 'init',
@@ -38,6 +43,6 @@ io.on('connection', socket => {
   });
 });
 
-io.listen(port,() => {
+server.listen(port,() => {
   console.log('Server is listening on port ' + port)
 });
