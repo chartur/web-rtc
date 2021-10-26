@@ -1,3 +1,8 @@
+const http = require('http');
+const server = new http.Server();
+const io = require('socket.io')(server);
+const port = process.env.PORT || 3001;
+
 const events = {
   INIT: 'init',
   CREATED: 'create',
@@ -7,123 +12,35 @@ const events = {
   ICE_CANDIDATES: 'ice-candidates',
   JOINED_NEW: 'joined-new-user'
 };
-const ICE_config = {
-  'iceServer': [
-    {'urls': 'stun:stun.services.mozilla.com'},
-    {'urls': 'stun:stun.l.google.com:19302'}
-  ]
-};
-const videoCandidates = {
-  video: true,
-  audio: true //should be true
-};
 
-let socket;
-let localStream;
+server.listen(port,() => {
+  console.log('Server is listening on port ' + port)
+});
 
-const conversation = document.getElementById('conversation');
-
-window.onload = async () => {
-  const url = new URL(window.location.href);
-  const id = url.searchParams.get('id');
-
-  if(!id) {
-    window.location.href = '/';
-  }
-
-  await initMyVideo();
-
-  socket = io('http://localhost:3001', {
-    data: {id},
-    transports: [
-      'websocket'
-    ]
-  });
-
-  socket.on(events.JOINED, createReceiverPeerConnection);
-  socket.on(events.CREATED, createCallerPeerConnection);
-  socket.emit(events.INIT, id);
-};
-
-async function initMyVideo() {
-  const myVideoTag = document.getElementById('my-video');
-  localStream = await navigator.mediaDevices.getUserMedia(videoCandidates);
-  myVideoTag.srcObject = localStream;
-}
-
-async function createCallerPeerConnection() {
-  const peerConnection = new RTCPeerConnection(ICE_config);
-  peerConnection.onicecandidate = addIceCandidatesCallback;
-  peerConnection.ontrack = addNewStream;
-
-  for (let track of localStream.getTracks()) {
-    peerConnection.addTrack(track, localStream);
-  }
-
-  const offer = await peerConnection.createOffer();
-  await peerConnection.setLocalDescription(offer);
-  socket.on(events.ANSWER, (answer) => {
-    console.log('on_answer');
-    const remoteDesc = new RTCSessionDescription(answer);
-    peerConnection.setRemoteDescription(remoteDesc);
-  });
-  socket.on(events.ICE_CANDIDATES, (data) => {
-    console.log('on_ice_candidate');
-    peerConnection.addIceCandidate(data)
-  });
-
-  socket.on(events.JOINED_NEW, async () => {
-    const offer = await peerConnection.createOffer();
-    socket.emit(events.OFFER, offer)
-  })
-}
-
-async function createReceiverPeerConnection() {
-  socket.on(events.OFFER, async (offer) => {
-    const peerConnection = new RTCPeerConnection(ICE_config);
-    peerConnection.onicecandidate = addIceCandidatesCallback;
-    peerConnection.ontrack = addNewStream;
-
-    for (let track of localStream.getTracks()) {
-      peerConnection.addTrack(track, localStream);
+io.on('connection', socket => {
+  socket.on(events.INIT, (room) => {
+    socket.roomId = room;
+    const conversation = io.sockets.adapter.rooms.get(room);
+    socket.join(room);
+    if(!conversation) {
+      console.log('created');
+      return socket.emit(events.CREATED);
     }
-
-
-    console.log(offer);
-    const remoteDesc = new RTCSessionDescription(offer);
-    await peerConnection.setRemoteDescription(remoteDesc);
-    const answer = await peerConnection.createAnswer();
-    await peerConnection.setLocalDescription(answer);
-    socket.emit(events.ANSWER, answer);
-
-    socket.on(events.ICE_CANDIDATES, (data) => {
-      console.log('on_ice_candidate');
-      peerConnection.addIceCandidate(data)
-    })
+    console.log('joined');
+    socket.emit(events.JOINED);
+    socket.to(room).emit(events.JOINED_NEW)
   });
-}
 
-function addIceCandidatesCallback(event) {
-  if(!event.candidate) {
-    return;
-  }
-  socket.emit(events.ICE_CANDIDATES, event.candidate)
-}
+  socket.on(events.OFFER, (offer) => {
+    socket.to(socket.roomId).emit(events.OFFER, offer);
+  });
 
-function addNewStream(trackEvent) {
-  const [stream] = trackEvent.streams;
-  let video = document.getElementById(stream.id);
-  if(!video) {
-    const div = document.createElement('div');
-    video = document.createElement('video');
-    video.id = stream.id;
-    video.autoplay = true;
-    video.srcObject = stream;
-    div.className = 'grid-item';
-    div.append(video);
-    conversation.append(div);
-    return;
-  }
+  socket.on(events.ANSWER, (offer) => {
+    socket.to(socket.roomId).emit(events.ANSWER, offer);
+  });
 
-}
-
+  socket.on(events.ICE_CANDIDATES, (iceCandidate) => {
+    console.log(iceCandidate);
+    socket.to(socket.roomId).emit(events.ICE_CANDIDATES, iceCandidate);
+  });
+});
