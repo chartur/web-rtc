@@ -2,6 +2,12 @@ const server = require('http').createServer();
 const io = require('socket.io')(server, {
   cors: {
     origins: ['*']
+  },
+  handlePreflightRequest: (req, res) => {
+    res.writeHead(200, {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': '*'
+    })
   }
 });
 const port = process.env.PORT || 3000;
