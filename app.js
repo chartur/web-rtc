@@ -3,7 +3,8 @@ const server = new http.Server();
 const io = require('socket.io')(server, {
   cors: {
     origin: "*"
-  }
+  },
+  allowEIO3: true
 });
 const port = process.env.PORT || 3000;
 
