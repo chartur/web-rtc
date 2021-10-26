@@ -1,7 +1,7 @@
 const http = require('http');
 const server = new http.Server();
 const io = require('socket.io')(server);
-const port = process.env.PORT || 3001;
+const port = process.env.PORT || 3000;
 
 const events = {
   INIT: 'init',
